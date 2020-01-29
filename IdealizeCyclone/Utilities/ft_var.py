@@ -17,7 +17,7 @@ Extract 0 and 1st fourier mode in circle around the center for a given variable 
 
 '''
 
-def ft_var(var_da, center, r_rad, nlev, lev_start, var_name, var_nshort):
+def ft_var(var_da, center, r_rad, nlev, lev_start, var_name, var_nshort, height, verbose = True):
 # 1. Polar coordinate transformation
     # This has to be done for every level seperately as it depends on the position of the center.
     nlev = int(nlev)
@@ -39,9 +39,10 @@ def ft_var(var_da, center, r_rad, nlev, lev_start, var_name, var_nshort):
     phi_grid_da = xr.DataArray(phi_grid, coords=[('phi', phi_grid)])
 
     # Calculations for each selected level
-    for i in range(0, nlev-lev_start+1, 1):
-        lev = i + lev_start
-        print('FT for level: ', lev)
+    for i in range(58-lev_start,59-lev_start):   # 0, nlev-lev_start+1, 1):
+        lev_index = i + lev_start-1
+        lev_height = height[lev_index]
+        print('FT for level: ', lev_index+1)
  
         # Calculate r and phi for single level
         r,phi = cart2pol(lon,lat,center[i,])
@@ -51,7 +52,9 @@ def ft_var(var_da, center, r_rad, nlev, lev_start, var_name, var_nshort):
         e_phi= np.array([-np.sin(phi), np.cos(phi)])
    
 # 2. Interpolate data to polar coordinates cells 
-   
+        if verbose:
+            print('Interpolating data and remapping to polar coordinates...')   
+        
         x_grid = x_center[i] + r_grid_da*np.cos(phi_grid_da)
         y_grid = y_center[i] + r_grid_da*np.sin(phi_grid_da)
 
@@ -68,8 +71,8 @@ def ft_var(var_da, center, r_rad, nlev, lev_start, var_name, var_nshort):
         # plt.scatter(x_polar, y_polar)                   
 
         # Interpolation 
-        # Select single level of density 
-        values = var_da.values[lev-1]
+        # Select single level of variable 
+        values = var_da.values[lev_index]
         #print(' This is the level: ', var_da.height[lev-1])
         points = np.asarray([var_da.clon.values[:], var_da.clat.values[:]]).transpose()
         remap_points = np.asarray([x_polar, y_polar]).reshape((2,len(x_polar[0]))).transpose()
@@ -85,6 +88,10 @@ def ft_var(var_da, center, r_rad, nlev, lev_start, var_name, var_nshort):
         var_polar_da = var_polar_da.fillna(0.)
 
 # 3. Fourier transformation
+        if verbose:
+            print('Starting FT...')
+        
+        background = var_da.values[0,lev_index].mean() 
 
         fvar = polar_dft(var_polar_da, polar_dim='phi')
         fvar_i = polar_idft(fvar, polar_dim='phi')
@@ -99,18 +106,23 @@ def ft_var(var_da, center, r_rad, nlev, lev_start, var_name, var_nshort):
         fvar0 = fvar.copy()
         fvar0[1:] = 0.  
         fvar0_i = polar_idft(fvar0)   
-
-        print('Creating plot...')
+        # Reduce 0 mode to p_4
+        fvar_p4_i = background - fvar0_i
+        
+        if verbose:
+            print('Creating plot...')
+        
         fig = plt.figure(figsize=(9,3))
         ax = fig.add_subplot(131)
         cs = ax.pcolor(fvar_i.x, fvar_i.y, xr.ufuncs.real(fvar_i))
-        ax.title.set_text('%s (level: %s)' % (var_name, lev))
+        ax.title.set_text('%s (level: %s)' % (var_name, lev_height))
         cb = plt.colorbar(cs, ax=ax) 
 
         ax = fig.add_subplot(132)
         ax.axes.get_yaxis().set_visible(False)
-        cs = ax.pcolor(fvar0_i.x, fvar0_i.y, xr.ufuncs.real(fvar0_i))
-        ax.title.set_text('Fourier mode 0')
+        #cs = ax.pcolor(fvar0_i.x, fvar0_i.y, xr.ufuncs.real(fvar0_i))
+        cs = ax.pcolor(fvar0_i.x, fvar0_i.y, xr.ufuncs.real(fvar_p4_i))
+        ax.title.set_text('Fourier mode 0 (no background)')
         cb = plt.colorbar(cs, ax=ax)
 
         ax = fig.add_subplot(133)
@@ -120,7 +132,7 @@ def ft_var(var_da, center, r_rad, nlev, lev_start, var_name, var_nshort):
         cb = plt.colorbar(cs, ax=ax)
     
         # Save image for each level
-        plt.savefig('/home/bekthkis/Plots/Fiona/%s/%s_ft_lev_%s.png' % (var_name, var_nshort, lev))
+        plt.savefig('/home/bekthkis/Plots/Fiona/%s/%s_ft_lev_%s.png' % (var_name, var_nshort, np.int(lev_height) ))
 
         plt.close()
     

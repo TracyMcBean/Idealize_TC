@@ -13,9 +13,12 @@ center_from_file  = True           # If center location should be read from
 center_file       = "./Data/center_fiona.npy"      # Name of file containing center
 data_file         = "/scratch/usr/bekthkis/ICON_08_2019/Fiona2016/init_data/dei4_NARVALII_2016081700_fg_DOM01_ML_0012.nc"
 lev_start         = 40             # Level from where the calculations should start
-km = 300                           # radius around cyclone
+km = 250                           # radius around cyclone
 r_earth = 6371                     # earths radius
-
+ft_variables = {'density': True, 'virt pot temp': True, 'pressure':True, \
+                'u':True, 'v':True, 'w':True, 'spec humidity':True, 'temperature':True, \
+                'spec cloud water': False, 'spec cloud ice': False, \
+                'rain mixing ratio': False, 'snow mixing ratio': False }
 #------------------------------------------------------------------------------
 
 # 1. Load data
@@ -47,3 +50,5 @@ else:
 # Add variables that shall be used in fourier transform
 ds = add_theta(ds)
 ds = add_u_polar(ds, center)
+
+
