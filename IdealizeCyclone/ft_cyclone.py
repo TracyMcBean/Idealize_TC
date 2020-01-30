@@ -35,7 +35,7 @@ ds = xr.open_dataset(data_file)
 
 # Number of levels in file (highest index is lowest level -> p-system)
 nlev = len(ds.height.values)
-height = ds.height.values
+height = ds.z_ifc.values
 
 # Load cyclone center
 if center_from_file:
@@ -78,54 +78,63 @@ if calc_rho:
     rho_da = ds.rho[0]
     ft_var(rho_da, center, r_rad, nlev, lev_start, 'Density', 'rho', height)
     print('Finished density.')
+    print('--------------------------------------------------')
 
 if calc_pres:
     print('Variable is pressure')
     pres_da = ds.pres[0]
     ft_var(pres_da, center, r_rad, nlev, lev_start, 'Pressure', 'pres', height)
     print('Finished pressure.')
+    print('--------------------------------------------------')
 
 if calc_theta_v:
     print('Variable is virtual potential temperature.')
     theta_v_da = ds.theta_v[0]
     ft_var(theta_v_da, center, r_rad, nlev, lev_start, 'virt_pot_temp', 'theta_v', height)
     print('Finished virt. pot. temp.')
+    print('--------------------------------------------------')
 
 if calc_temp:
     print('Variable is temperature.')
     temp_da = ds.temp[0]
     ft_var(temp_da, center, r_rad, nlev, lev_start, 'Temperature', 'temp', height)
     print('Finished temperature')
+    print('--------------------------------------------------')
 
 if calc_qv:
     print('Variable is specific humidity .')
     qv_da = ds.qv[0]
     ft_var(qv_da, center, r_rad, nlev, lev_start, 'Humidity/spec_humidity', 'qv', height)
     print('Finished specific humidity ')
+    print('--------------------------------------------------')
 
 if calc_qc:
     print('Variable is specific cloud water content.')
     qc_da = ds.qc[0]
-    ft_var(qc_da, center, r_rad, nlev, lev_start, 'Humidity/spec_cwc', 'qc')
+    ft_var(qc_da, center, r_rad, nlev, lev_start, 'Humidity/spec_cwc', 'qc', height)
     print('Finished spec cloud water content')
+    print('--------------------------------------------------')
 
 if calc_qi:
     print('Variable is spec cloud ice content.')
     qi_da = ds.qi[0]
-    ft_var(qi_da, center, r_rad, nlev, lev_start, 'Humditiy/spec_cic', 'qi')
+    ft_var(qi_da, center, r_rad, nlev, lev_start, 'Humidity/spec_cic', 'qi', height)
     print('Finished ')
+    print('--------------------------------------------------')
 
 if calc_qr:
     print('Variable is rain mixing ratio.')
     qr_da = ds.qr[0]
-    ft_var(qr_da, center, r_rad, nlev, lev_start, 'Humidity/rain_mr', 'qr')
+    ft_var(qr_da, center, r_rad, nlev, lev_start, 'Humidity/rain_mr', 'qr', height)
     print('Finished rain mixing ratio.')
+    print('--------------------------------------------------')
 
 if calc_qs:
     print('Variable is snow mixing ratio .')
     qs_da = ds.qs[0]
-    ft_var(qs_da, center, r_rad, nlev, lev_start, 'Humidity/snow_mr', 'qs')
+    ft_var(qs_da, center, r_rad, nlev, lev_start, 'Humidity/snow_mr', 'qs', height)
     print('Finished snow mixing ratio.')
+    print('--------------------------------------------------')
 
 #------------------------------------------------------------------------------
 # Z. Plots

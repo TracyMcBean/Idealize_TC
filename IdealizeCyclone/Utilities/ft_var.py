@@ -32,17 +32,17 @@ def ft_var(var_da, center, r_rad, nlev, lev_start, var_name, var_nshort, height,
 
     # Create grid on which values shall be mapped.
     # Reduce number of points to see point pattern after interpolation
-    r_grid = np.linspace(0,r_rad,100).transpose()
-    phi_grid = np.linspace(-np.pi,np.pi,100,endpoint=False)
+    r_grid = np.linspace(0,r_rad,200).transpose()
+    phi_grid = np.linspace(-np.pi,np.pi,200,endpoint=False)
 
     r_grid_da = xr.DataArray(r_grid, coords=[('r', r_grid)])
     phi_grid_da = xr.DataArray(phi_grid, coords=[('phi', phi_grid)])
 
     # Calculations for each selected level
-    for i in range(58-lev_start,59-lev_start):   # 0, nlev-lev_start+1, 1):
+    for i in range(50-lev_start,53-lev_start):   # 0, nlev-lev_start+1, 1):
         lev_index = i + lev_start-1
-        lev_height = height[lev_index]
-        print('FT for level: ', lev_index+1)
+        lev_height = height[lev_index,0]
+        print('FT for level: ', lev_index+1, lev_height)
  
         # Calculate r and phi for single level
         r,phi = cart2pol(lon,lat,center[i,])
@@ -91,7 +91,7 @@ def ft_var(var_da, center, r_rad, nlev, lev_start, var_name, var_nshort, height,
         if verbose:
             print('Starting FT...')
         
-        background = var_da.values[0,lev_index].mean() 
+        background = var_da.values[lev_index].mean() 
 
         fvar = polar_dft(var_polar_da, polar_dim='phi')
         fvar_i = polar_idft(fvar, polar_dim='phi')
@@ -115,14 +115,14 @@ def ft_var(var_da, center, r_rad, nlev, lev_start, var_name, var_nshort, height,
         fig = plt.figure(figsize=(9,3))
         ax = fig.add_subplot(131)
         cs = ax.pcolor(fvar_i.x, fvar_i.y, xr.ufuncs.real(fvar_i))
-        ax.title.set_text('%s (level: %s)' % (var_name, lev_height))
+        ax.title.set_text('%s (%s m)' % (var_name, np.int(lev_height)))
         cb = plt.colorbar(cs, ax=ax) 
 
         ax = fig.add_subplot(132)
         ax.axes.get_yaxis().set_visible(False)
         #cs = ax.pcolor(fvar0_i.x, fvar0_i.y, xr.ufuncs.real(fvar0_i))
         cs = ax.pcolor(fvar0_i.x, fvar0_i.y, xr.ufuncs.real(fvar_p4_i))
-        ax.title.set_text('Fourier mode 0 (no background)')
+        ax.title.set_text('Fourier mode 0 (p_4)')
         cb = plt.colorbar(cs, ax=ax)
 
         ax = fig.add_subplot(133)

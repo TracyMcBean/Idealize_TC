@@ -24,6 +24,7 @@ data_file         = "/scratch/usr/bekthkis/ICON_08_2019/Fiona2016/init_data/dei4
 lev_start         = 35             # Level from where the calculations should start
 km = 300                           # radius around cyclone
 r_earth = 6371                     # earths radius
+plot_p4 = True                     # Create plot for fourier mode 0 only p4 part
 #------------------------------------------------------------------------------
 # 1. Load data
 # Load initial data
@@ -31,6 +32,7 @@ ds = xr.open_dataset(data_file)
 
 # Number of levels in file (highest index is lowest level -> p-system)
 nlev = len(ds.height.values)
+height = ds.z_ifc.values
 
 # Load cyclone center
 if center_from_file:
@@ -88,9 +90,9 @@ mag_u_phi= np.empty([nlev-lev_start+1,len(ds.ncells.values)])
 
 print('Polar coordinate transformation...')
 
-for i in range(60-lev_start,62-lev_start):#(0, nlev-lev_start): #nlev-lev_start+1, 1):
-    lev = i + lev_start
-    print('FT for level: ', lev)
+for i in range(40-lev_start,50-lev_start):#(0, nlev-lev_start): #nlev-lev_start+1, 1):
+    lev_index = i + lev_start-1
+    print('FT for level: ', lev_index+1)
 
     # Calculate r and phi for single level (here level 35)
     r,phi = cart2pol(x,y,center[i,])
@@ -154,6 +156,7 @@ for i in range(60-lev_start,62-lev_start):#(0, nlev-lev_start): #nlev-lev_start+
     u_phi_polar_da = u_phi_polar_da.fillna(0.)
 
 # 3. Fourier transformation
+    background_ur = u_r_polar_da.values.mean()
 
     fur = polar_dft(u_r_polar_da, polar_dim='phi')
     fur_i = polar_idft(fur, polar_dim='phi')
@@ -169,31 +172,38 @@ for i in range(60-lev_start,62-lev_start):#(0, nlev-lev_start): #nlev-lev_start+
     fur0[1:] = 0.
     fur0_i = polar_idft(fur0)
 
+    fur_p4_i = background_ur - fur0_i
+
     print('Creating plot...')
     fig = plt.figure(figsize=(9,3))
     ax = fig.add_subplot(131)
-    cs = ax.pcolor(fur_i.x, fur_i.y, xr.ufuncs.real(fur_i))
-    ax.title.set_text('Radial wind (level: %s)' % lev)
+    cs = ax.pcolor(fur_i.x, fur_i.y, np.abs(xr.ufuncs.real(fur_i)))
+    ax.title.set_text('Mag. radial wind (%s m)' % np.int(height[lev_index,0]))
     cb = plt.colorbar(cs, ax=ax)
 
     ax = fig.add_subplot(132)
     ax.axes.get_yaxis().set_visible(False)
-    cs = ax.pcolor(fur0_i.x, fur0_i.y, xr.ufuncs.real(fur0_i))
-    ax.title.set_text('Fourier mode 0')
+    if plot_p4:
+        cs = ax.pcolor(fur0_i.x, fur0_i.y, np.abs(xr.ufuncs.real(fur_p4_i)))
+        ax.title.set_text('Fourier mode 0 (p4)')
+    else:
+        cs = ax.pcolor(fur0_i.x, fur0_i.y, np.abs(xr.ufuncs.real(fur0_i)))
+        ax.title.set_text('Fourier mode 0')
     cb = plt.colorbar(cs, ax=ax)
 
     ax = fig.add_subplot(133)
     ax.axes.get_yaxis().set_visible(False)
-    cs = ax.pcolor(fur1_i.x, fur1_i.y, xr.ufuncs.real(fur1_i))
+    cs = ax.pcolor(fur1_i.x, fur1_i.y, np.abs(xr.ufuncs.real(fur1_i)))
     ax.title.set_text('Fourier mode 1')
     cb = plt.colorbar(cs, ax=ax)
 
     # Save image for each level
-    plt.savefig('/home/bekthkis/Plots/Fiona/Wind/u_r/ur_ft_lev_%s.png' % lev)
+    plt.savefig('/home/bekthkis/Plots/Fiona/Wind/u_r/mag_ur_ft_lev_%s.png' % np.int(height[lev_index,0]))
 
     plt.close()
 
 # 3. Fourier transformation
+    background_uphi = u_phi_polar_da.values.mean()
 
     fuphi = polar_dft(u_phi_polar_da, polar_dim='phi')
     fuphi_i = polar_idft(fuphi, polar_dim='phi')
@@ -208,28 +218,35 @@ for i in range(60-lev_start,62-lev_start):#(0, nlev-lev_start): #nlev-lev_start+
     fuphi0 = fuphi.copy()
     fuphi0[1:] = 0.
     fuphi0_i = polar_idft(fuphi0)
+    
+    # Get p4 from mode 0
+    fuphi_p4_i = background_uphi - fuphi0_i
 
     print('Creating plot...')
     fig = plt.figure(figsize=(9,3))
     ax = fig.add_subplot(131)
-    cs = ax.pcolor(fuphi_i.x, fuphi_i.y, xr.ufuncs.real(fuphi_i))
-    ax.title.set_text('Radial wind (level: %s)' % lev)
+    cs = ax.pcolor(fuphi_i.x, fuphi_i.y, np.abs(xr.ufuncs.real(fuphi_i)))
+    ax.title.set_text('Mag tan. wind ( %s m)' % np.int(height[lev_index, 0]))
     cb = plt.colorbar(cs, ax=ax)
-
+    
     ax = fig.add_subplot(132)
     ax.axes.get_yaxis().set_visible(False)
-    cs = ax.pcolor(fuphi0_i.x, fuphi0_i.y, xr.ufuncs.real(fuphi0_i))
-    ax.title.set_text('Fourier mode 0')
+    if plot_p4:    
+        cs = ax.pcolor(fuphi0_i.x, fuphi0_i.y, np.abs(xr.ufuncs.real(fuphi_p4_i)))
+        ax.title.set_text('Fourier mode 0 (p4)')
+    else:
+        cs = ax.pcolor(fuphi0_i.x, fuphi0_i.y, np.abs(xr.ufuncs.real(fuphi0_i)))
+        ax.title.set_text('Fourier mode 0')
     cb = plt.colorbar(cs, ax=ax)
 
     ax = fig.add_subplot(133)
     ax.axes.get_yaxis().set_visible(False)
-    cs = ax.pcolor(fuphi1_i.x, fuphi1_i.y, xr.ufuncs.real(fuphi1_i))
+    cs = ax.pcolor(fuphi1_i.x, fuphi1_i.y, np.abs(xr.ufuncs.real(fuphi1_i)))
     ax.title.set_text('Fourier mode 1')
     cb = plt.colorbar(cs, ax=ax)
 
     # Save image for each level
-    plt.savefig('/home/bekthkis/Plots/Fiona/Wind/u_phi/uphi_ft_lev_%s.png' % lev)
+    plt.savefig('/home/bekthkis/Plots/Fiona/Wind/u_phi/mag_uphi_ft_lev_%s.png' % np.int(height[lev_index,0]))
 
     plt.close()
 
