@@ -81,7 +81,6 @@ def add_u_polar(ds, center):
         else:
             # Transform lon-lat coordinates to polar
             ci = i -(nlev-len(center))
-            print('This is ci: %s and i: %s' % (ci,i))
             x = ds.clon.values
             y = ds.clat.values
             r,phi = cart2pol(x,y,center[ci,])
