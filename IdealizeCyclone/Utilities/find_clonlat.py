@@ -1,8 +1,10 @@
 import numpy as np
 import math
 import xarray as xr
+from numba import jit
 
-def get_clonlat(fg, single_lev, r):
+@jit(parallel=True)
+def get_clonlat(fg, single_lev, p_env, r):
    '''
    Get the location of the center point on a single level, given a first guess and a data set.
    r is radius of circle that should be selected.
@@ -42,8 +44,8 @@ def get_clonlat(fg, single_lev, r):
    # Calculate average over all cells in circle region
    #p_env = np.mean(circle_sel.pres.values)
    # I am using p_max because otherwise I end up with lots of negative values and therefore get wrong values
-   p_max = circle_sel.pres.values.max()
-   p_prime = p_max - circle_sel.pres.values
+   #p_max = circle_sel.pres.values.max()
+   p_prime = p_env - circle_sel.pres.values
 
    clon_new = np.sum(circle_sel.clon.values * p_prime)/np.sum(p_prime)
    clat_new = np.sum(circle_sel.clat.values * p_prime)/np.sum(p_prime)
@@ -57,7 +59,7 @@ def get_clonlat(fg, single_lev, r):
       # Recursively find the center
       print('starting new calculation for center')
       print(clon_new, clat_new)
-      get_clonlat([clon_new, clat_new], single_lev, r)
+      get_clonlat([clon_new, clat_new], single_lev, p_env, r)
    else:
       print('Found: ', clon_new, clat_new) 
       return (clon_new, clat_new)
