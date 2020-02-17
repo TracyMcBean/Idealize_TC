@@ -1,0 +1,59 @@
+furneg1 = fur.copy()
+furneg1[0:-1] = 0.
+furneg1_i = polar_idft(furneg1)
+
+fur_max = np.empty((len(r_grid)))    
+fur1_max = np.empty((len(r_grid)))                                         
+fur2_max = np.empty((len(r_grid)))                                         
+fur0_max = np.empty((len(r_grid)))
+furneg1_max = np.empty((len(r_grid)))    
+
+for r_index in range(len(r_grid)): 
+    fur_max[r_index] = np.abs(xr.ufuncs.real(fur_i[:,r_index])).max() 
+    fur1_max[r_index] = np.abs(xr.ufuncs.real(fur1_i[:,r_index])).max()  
+    furneg1_max[r_index] = np.abs(xr.ufuncs.real(furneg1_i[:,r_index])).max()
+    fur2_max[r_index] = np.abs(xr.ufuncs.real(fur2_i[:,r_index])).max()  
+    fur0_max[r_index] = np.abs(xr.ufuncs.real(fur0_i[:,r_index])).max()
+
+fig, ax = plt.subplots()  
+ax.plot(r_grid, fur1_max, marker='o',markersize=2, label="F1")  
+ax.plot(r_grid,fur0_max, label="F0")  
+ax.plot(r_grid,furneg1_max, linestyle = 'dashed', label="F-1")  
+ax.plot(r_grid,fur2_max, label="F2")  
+ax.plot(r_grid,fur_max, label="all")  
+ax.set(xlabel='radius (rad)', ylabel='u_r (m/s)', title = 'Mag. maximu
+m radial wind')  
+ax.grid()  
+ax.legend(loc='upper right')  
+     
+fuphi2 = fur.copy()                                                   
+fuphi2[0:2] = 0.                                                      
+fuphi2[3:] = 0.                                                       
+fuphi2_i = polar_idft(fuphi2)    
+
+
+fuphi_max = np.empty((len(r_grid)))
+fuphi1_max = np.empty((len(r_grid)))
+fuphi2_max = np.empty((len(r_grid)))          
+fuphi0_max = np.empty((len(r_grid)))
+fuphi_neg1_max = np.empty((len(r_grid)))
+
+for r_index in range(len(r_grid)): 
+    fuphi_max[r_index] = np.abs(xr.ufuncs.real(fuphi_i[:,r_index])).max() 
+    fuphi1_max[r_index] = np.abs(xr.ufuncs.real(fuphi1_i[:,r_index])).max()
+    fuphi_neg1_max[r_index] = np.abs(xr.ufuncs.real(fuphi_neg1_i[:,r_index])).max()
+    fuphi2_max[r_index] = np.abs(xr.ufuncs.real(fuphi2_i[:,r_index])).max()
+    fuphi0_max[r_index] = np.abs(xr.ufuncs.real(fuphi0_i[:,r_index])).max()
+
+fig, ax = plt.subplots() 
+ax.plot(r_grid, fuphi1_max, marker='o',markersize=2, label="F1") 
+ax.plot(r_grid,fuphi0_max, label="F0")   
+ax.plot(r_grid,fuphi_neg1_max, linestyle = 'dashed', label="F-1") 
+ax.plot(r_grid,fuphi2_max, label="F2") 
+ax.plot(r_grid,fuphi_max, label="all") 
+ax.set(xlabel='radius (rad)', ylabel='u_phi (m/s)', title = 'Mag. maxi
+mum tangential wind') 
+ax.grid() 
+ax.legend(loc='upper right') 
+
+              

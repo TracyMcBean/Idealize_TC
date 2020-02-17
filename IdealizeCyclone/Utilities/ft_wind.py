@@ -14,29 +14,15 @@ from Utilities.coord_func import cart2pol
 from Utilities.coord_func import sel_blending_smooth as sel_blending
 from AsymptoticSolver import polar_dft, polar_idft, pick_fourier_comp
 
+'''
+Extract 0 and 1st fourier mode in circle around the center for a given variable and save plots.
+
+
+'''
 
 @jit(parallel=True)
 def ft_var(var_da, center, r_rad, nlev, lev_start, var_name, var_nshort, height, verbose = True, create_plot = False, r_earth=6371):
-    '''
-    Convert a given variable from lon-lat into polar coordinates.
-    Extract 0 and 1st fourier mode in circle around the center save plots if required.
-    Create blending zone on border of idealized data and save blended and idealized data.
-    Return data array with variable which has been idealized around center.
-
-    Keyword arguments:
-    dataarray -- Variable for which FT should be done
-    array     -- Contains centerline
-    float     -- radius in radians for circle to be selected around centerline
-    int       -- number of levels for which variable is given
-    int       -- level from which calculations should start
-    string    -- Name of variable (path to file in plots folder)
-    string    -- Name of variable as given in dataarray
-    array     -- Cotaining height in unit (m/km/p etc)
-    boolean   -- True if verbose
-    boolean   -- True if plots should be created and saved
-    int       -- Earths radius (Constant but depending on source)
-    '''
-    # 1. Polar coordinate transformation
+# 1. Polar coordinate transformation
     # This has to be done for every level seperately as it depends on the position of the center.
     nlev = int(nlev)
     lev_start = int(lev_start)
@@ -91,7 +77,7 @@ def ft_var(var_da, center, r_rad, nlev, lev_start, var_name, var_nshort, height,
         # plt.title('Points on which variable should be mapped')
         # plt.scatter(x_polar, y_polar)                   
 
-        # Interpolation (griddata() is slow!)
+        # Interpolation 
         # Select single level of variable 
         values = var_da.values[lev_index]
         #print(' This is the level: ', var_da.height[lev-1])

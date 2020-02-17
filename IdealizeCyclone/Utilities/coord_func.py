@@ -1,7 +1,13 @@
+'''
+Contains: cart2pol, blend_func, sel_blending_dis, sel_blending_smooth
+'''
+
 import numpy as np
 import math
 import random
+from numba import jit
 
+@jit
 def cart2pol(x,y,origin):
     '''
     Convert cartesian coordinates to polar coordinates.
@@ -14,6 +20,7 @@ def cart2pol(x,y,origin):
     phi = np.arctan2((y-y0), (x-x0))
     return(rho, phi)
 
+@jit
 def blend_func(x, x_0, k=1, L=1):
     """ Logistic function to blend the idealized data with the original data.
     Calculated the probability of a given radius (x) to be accepted. Smaller radius will has higher probability of being accepted.
@@ -31,7 +38,8 @@ def blend_func(x, x_0, k=1, L=1):
 
     return p
 
-def sel_blending(r, r_rad, val_ideal, val_orig, r_earth=6371):
+@jit
+def sel_blending_dis(r, r_rad, val_ideal, val_orig, r_earth=6371):
     """
     Choose if original or idealized data should be saved for a given cell.
     
@@ -58,4 +66,27 @@ def sel_blending(r, r_rad, val_ideal, val_orig, r_earth=6371):
         else:
             print('--- selected original data')
 
-    return val_ideal if p_rand < p else val_orig 
+    return val_ideal if p_rand < p else val_orig
+
+@jit
+def sel_blending_smooth(r, r_rad, val_ideal, val_orig, r_earth=6371):
+    """
+    Smooth blending for selected region. Use values of both original and 
+    idealized data, based on their weights.
+    
+    Keyword arguments:
+    float -- radius of cell
+    float -- idealized value of cell
+    float -- original value of cell
+    """
+    
+    # Set midpoint for the logistic function
+    # Total border region is 50 km therefore the middle is by 25 km
+    km25_rad = 25/r_earth    
+    x0 = r_rad - km25_rad
+    # Get probability of acceptance
+    p = blend_func(r, x0, k=1100)
+
+    value = p * val_ideal + (1-p) * val_orig 
+
+    return value 

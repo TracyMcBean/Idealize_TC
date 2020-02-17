@@ -2,7 +2,7 @@ import xarray as xr
 import numpy as np
 import math
 from matplotlib import pyplot as plt 
-from guppy import hpy; h=hpy()
+#from guppy import hpy; h=hpy()
 from find_clonlat import get_clonlat
 from multiprocessing import Pool
 
@@ -34,13 +34,13 @@ save = True               # Should center array be saved in to "filename"
 #==============================================================================
 
 # Read in data
-pres_ds = xr.open_dataset('pres_data.nc')
+pres_ds = xr.open_dataset('../Data/pres_data.nc')
 
 # extract region of fiona 
 pres_ds = pres_ds.where(pres_ds['clon'] < lonlat_box['lon_up'], drop=True)
 pres_ds = pres_ds.where(pres_ds['clon'] > lonlat_box['lon_down'], drop=True)
 pres_ds = pres_ds.where(pres_ds['clat'] > lonlat_box['lat_up'], drop=True)
-pres_ds = pres_ds.where(pres_ds['clat'] < lonlat_box['lat_down'], drop=True)
+pres_ds = fpres_ds.where(pres_ds['clat'] < lonlat_box['lat_down'], drop=True)
 
 #print(h.heap())
 

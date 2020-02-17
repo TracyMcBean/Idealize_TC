@@ -1,6 +1,5 @@
 import xarray as xr
 import numpy as np
-
 from Utilities.add_var import add_theta, add_u_polar
 from Utilities.ft_var import ft_var
 
@@ -16,16 +15,17 @@ Create idealized initial data using given initial data. Tested for Fiona dataset
 center_from_file  = True           # If center location should be read from
                                    # array, set to true
 center_file       = "./Data/center_fiona.npy"      # Name of file containing center
-data_file         = "/scratch/usr/bekthkis/ICON_08_2019/Fiona2016/init_data/dei4_NARVALII_2016081700_fg_DOM01_ML_0012.nc"
-data_out_file     = "/scratch/usr/bekthkis/ICON_08_2019/Fiona2016/init_data/test_idealized.nc"
-lev_start         = 40             # Level from where the calculations should start
+data_file         = "../../../init_data/dei4_NARVALII_2016081700_fg_DOM01_ML_0012.nc"
+data_out_file     = "../../../init_data/test_idealized.nc"
+save_ds           = False         # Save data set containing idealized data
+lev_start         = 38            # Level from where the calculations should start
 km = 250                           # radius around cyclone
 r_earth = 6371                     # earths radius
-ft_variables = {'density': True, 'virt pot temp': True , 'pressure':True, \
-                'horizontal wind':False, 'w':False, 'spec humidity':True, \
-                'temperature':True, 'turbulent kinetic energy': True, \
-                'spec cloud water': True, 'spec cloud ice': True, \
-                'rain mixing ratio': True, 'snow mixing ratio': False }
+ft_variables = {'density': False, 'virt pot temp': False , 'pressure':True, \
+                'horizontal wind':False, 'w':False, 'spec humidity':False, \
+                'temperature':True, 'turbulent kinetic energy': False, \
+                'spec cloud water': False, 'spec cloud ice': False, \
+                'rain mixing ratio': False, 'snow mixing ratio': False }
 #------------------------------------------------------------------------------
 
 # Set radius in radian using km
@@ -61,8 +61,8 @@ else:
 # 2. Preprocess data -----------------------------------------------------------
 
 # Add variables that shall be used in fourier transform
-#ds = add_theta(ds)
-#ds = add_u_polar(ds, center)
+ds = add_theta(ds)
+ds = add_u_polar(ds, center)
 
 if ft_variables['density']:
     print('----------------------------------------------------------')
@@ -85,11 +85,15 @@ if ft_variables['pressure']:
 if ft_variables['horizontal wind']:
     print('----------------------------------------------------------')
     print('Horizontal wind')
+    ideal_u_phi = ft_var(ds.u_phi[0], center, r_rad, nlev, lev_start, 'Wind/u_phi', 'u_phi', height, create_plot=True) 
+    ideal_u_r = ft_var(ds.u_r[0], center, r_rad, nlev, lev_start, 'Wind/u_r', 'u_r', height, create_plot=True)
+    #TODO: Calculate u and v from u_phi and u_r
+
 
 if ft_variables['w']:
     print('----------------------------------------------------------')
     print('Vertical wind')
-    ideal_data_da = ft_var(ds.w[0], center, r_rad, nlev, lev_start, 'Wind/w', 'w', height)
+    ideal_data_da = ft_var(ds.w[0], center, r_rad, nlev+1, lev_start, 'Wind/w', 'w', height)
     ds.w[0] = ideal_data_da
 
 if ft_variables['temperature']:
@@ -139,7 +143,8 @@ if ft_variables['snow mixing ratio']:
 print(ds)
 
 # Save idealized data set
-ds.to_netcdf(data_out_file, mode = 'w', format='NETCDF4')
+if save_ds:
+    ds.to_netcdf(data_out_file, mode = 'w', format='NETCDF4')
 
 
 plt.figure()
