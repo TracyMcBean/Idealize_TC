@@ -6,13 +6,14 @@ from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 # initial data
-ds = xr.open_dataset("/scratch/usr/bekthkis/ICON_08_2019/Fiona2016/init_data/dei4_NARVALII_2016081700_fg_DOM01_ML_0012.nc")
+ds = xr.open_dataset("../../../init_data/dei4_NARVALII_2016081700_fg_DOM01_ML_0012.nc")
 
 # Centerline ------------------------------------------------------------------
 plot_centerline = True
 
-center = np.load('./Data/center_fiona.npy')
-ds = xr.open_dataset("/scratch/usr/bekthkis/ICON_08_2019/Fiona2016/init_data/dei4_NARVALII_2016081700_fg_DOM01_ML_0012.nc")
+#center = np.load('./Data/center_fiona.npy')
+center = np.load('./Data/center_fiona_p_env.npy')
+ds = xr.open_dataset("../../../init_data/dei4_NARVALII_2016081700_fg_DOM01_ML_0012.nc")
 
 print(ds.z_ifc.values[(34+9):75,0], 'length: ', len(ds.z_ifc.values[(34+9):75,0]))
 
