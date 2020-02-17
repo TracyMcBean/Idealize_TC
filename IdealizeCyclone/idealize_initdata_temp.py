@@ -17,15 +17,15 @@ center_from_file  = True           # If center location should be read from
                                    # array, set to true
 center_file       = "./Data/center_fiona.npy"      # Name of file containing center
 data_file         = "/scratch/usr/bekthkis/ICON_08_2019/Fiona2016/init_data/dei4_NARVALII_2016081700_fg_DOM01_ML_0012.nc"
-data_out_file     = "/scratch/usr/bekthkis/ICON_08_2019/Fiona2016/init_data/test_idealized.nc"
+data_out_file     = "/scratch/usr/bekthkis/ICON_08_2019/Fiona2016/init_data/temp_idealized.nc"
 lev_start         = 40             # Level from where the calculations should start
 km = 250                           # radius around cyclone
 r_earth = 6371                     # earths radius
-ft_variables = {'density': True, 'virt pot temp': True , 'pressure':True, \
-                'horizontal wind':False, 'w':False, 'spec humidity':True, \
-                'temperature':True, 'turbulent kinetic energy': True, \
-                'spec cloud water': True, 'spec cloud ice': True, \
-                'rain mixing ratio': True, 'snow mixing ratio': False }
+ft_variables = {'density': False, 'virt pot temp': False , 'pressure':False, \
+                'horizontal wind':False, 'w':False, 'spec humidity':False, \
+                'temperature': True, 'turbulent kinetic energy': False, \
+                'spec cloud water': False, 'spec cloud ice': False, \
+                'rain mixing ratio': False, 'snow mixing ratio': False }
 #------------------------------------------------------------------------------
 
 # Set radius in radian using km
@@ -143,6 +143,6 @@ ds.to_netcdf(data_out_file, mode = 'w', format='NETCDF4')
 
 
 plt.figure()
-plt.tripcolor(ds.clon, ds.clat, ds.pres.isel(time = 0, height=49))
+plt.tripcolor(ds.clon, ds.clat, ds.temp.isel(time = 0, height=49))
 plt.colorbar()
 plt.show()

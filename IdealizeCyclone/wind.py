@@ -78,8 +78,8 @@ r_grid_da = xr.DataArray(r_grid, coords=[('r', r_grid)])
 phi_grid_da = xr.DataArray(phi_grid, coords=[('phi', phi_grid)])
 
 # Select wind
-u = ds.u.values[0,(lev_start-1):nlev]
-v = ds.v.values[0,(lev_start-1):nlev]
+#u = ds.u.values[0,(lev_start-1):nlev]
+#v = ds.v.values[0,(lev_start-1):nlev]
 
 #Create arrays for circumferential and radial wind
 u_r    = np.empty([nlev-lev_start+1,len(ds.ncells.values)])

@@ -41,7 +41,7 @@ def ft_var(var_da, center, r_rad, nlev, lev_start, var_name, var_nshort, height,
     phi_grid_da = xr.DataArray(phi_grid, coords=[('phi', phi_grid)])
 
     # Calculations for each selected level
-    for i in range(50-lev_start,51-lev_start):  
+    for i in range(64-lev_start,nlev-lev_start+1):  
     #for i in range(0, nlev-lev_start+1, 1):
         lev_index = i + lev_start-1
         lev_height = height[lev_index,0]
@@ -124,7 +124,7 @@ def ft_var(var_da, center, r_rad, nlev, lev_start, var_name, var_nshort, height,
             fvar0[1:] = 0.  
             fvar0_i = polar_idft(fvar0)   
             # Reduce 0 mode to p_4
-            fvar_p4_i = background - fvar0_i
+            fvar_p4_i = fvar0_i - background
     
 # 4. Transform idealized data back to lon lat grid.
         if verbose:
