@@ -1,6 +1,6 @@
 import xarray as xr
 import numpy as np
-from Utilities.add_var import add_theta, add_u_polar
+from Utilities.add_var import add_theta, add_u_polar, get_uv_from_polar
 from Utilities.ft_var import ft_var
 
 from matplotlib import pyplot as plt
@@ -21,16 +21,15 @@ save_ds           = False         # Save data set containing idealized data
 lev_start         = 38            # Level from where the calculations should start
 km = 250                           # radius around cyclone
 r_earth = 6371                     # earths radius
-ft_variables = {'density': False, 'virt pot temp': False , 'pressure':True, \
-                'horizontal wind':False, 'w':False, 'spec humidity':False, \
-                'temperature':True, 'turbulent kinetic energy': False, \
+ft_variables = {'density': False, 'virt pot temp': False, 'pressure':False, \
+                'horizontal wind':True, 'w':False, 'spec humidity':False, \
+                'temperature':False, 'turbulent kinetic energy': False, \
                 'spec cloud water': False, 'spec cloud ice': False, \
                 'rain mixing ratio': False, 'snow mixing ratio': False }
 #------------------------------------------------------------------------------
 
 # Set radius in radian using km
 r_rad = km / r_earth
-
 
 # initial data
 ds = xr.open_dataset(data_file)
@@ -61,7 +60,7 @@ else:
 # 2. Preprocess data -----------------------------------------------------------
 
 # Add variables that shall be used in fourier transform
-ds = add_theta(ds)
+#ds = add_theta(ds)
 ds = add_u_polar(ds, center)
 
 if ft_variables['density']:
@@ -73,21 +72,24 @@ if ft_variables['density']:
 if ft_variables['virt pot temp']:
     print('----------------------------------------------------------')
     print('Virtual potential temperature')
-    deal_data_da = ft_var(ds.theta_v[0], center, r_rad, nlev, lev_start, 'virt_pot_temp', 'theta_v', height, create_plot=True)
+    ideal_data_da = ft_var(ds.theta_v[0], center, r_rad, nlev, lev_start, 'virt_pot_temp', 'theta_v', height, create_plot=False)
     ds.theta_v[0] = ideal_data_da
+
 
 if ft_variables['pressure']:
     print('----------------------------------------------------------')
     print('Pressure')
-    ideal_data_da = ft_var(ds.pres[0], center, r_rad, nlev, lev_start, 'Pressure', 'pres', height, create_plot=True)
+    ideal_data_da = ft_var(ds.pres[0], center, r_rad, nlev, lev_start, 'Pressure', 'pres', height, create_plot=False)
     ds.pres[0] = ideal_data_da
+
 
 if ft_variables['horizontal wind']:
     print('----------------------------------------------------------')
     print('Horizontal wind')
     ideal_u_phi = ft_var(ds.u_phi[0], center, r_rad, nlev, lev_start, 'Wind/u_phi', 'u_phi', height, create_plot=True) 
     ideal_u_r = ft_var(ds.u_r[0], center, r_rad, nlev, lev_start, 'Wind/u_r', 'u_r', height, create_plot=True)
-    #TODO: Calculate u and v from u_phi and u_r
+    # Calculate u and v based on u_phi and u_r
+    ds = get_uv_from_polar(ds,center)
 
 
 if ft_variables['w']:
@@ -148,6 +150,12 @@ if save_ds:
 
 
 plt.figure()
-plt.tripcolor(ds.clon, ds.clat, ds.pres.isel(time = 0, height=49))
+plt.tripcolor(ds.clon, ds.clat, ds.u.isel(time = 0, height=69))
 plt.colorbar()
 plt.show()
+'''
+plt.figure()
+plt.tripcolor(ds.clon, ds.clat, ds.theta_v.isel(time = 0, height=70))
+plt.colorbar()
+plt.show()
+'''

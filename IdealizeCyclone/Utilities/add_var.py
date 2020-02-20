@@ -110,25 +110,25 @@ def get_uv_from_polar(ds, center):
     try:
         ds.u_phi
         ds.u_r
+        ds.u
+        ds.v
         ds.clon
         ds.clat
         ds.z_ifc
     except AttributeError:
-        print('One or several of following variables not found in data set: u_phi, u_r, clon, clat, z_ifc!!')
+        print('One or several of following variables not found in data set: u_phi, u_r, u, v, clon, clat, z_ifc!!')
     
-    print('Calculate u_r and u_theta for following levels: %s to %s' % (ds.z_ifc.values[-len(center),0], ds.z_ifc.values[-1,0]))
+    print('Calculate v and u for following levels: %s to %s' % (ds.z_ifc.values[-len(center),0], ds.z_ifc.values[-1,0]))
 
     # Number of levels for these parameters
     nlev = len(ds.height)
     
-    u_r = ds.u_r
-    u_phi = ds.u_phi
+    u = ds.u
+    v = ds.v
     
-    # Use center for possible levels. All other levels will simply be set to zero because they are not necessary.
+    # Only replace levels of ds.u and ds.v where we have calculated u_phi and u_r.
     for i in range (0,nlev):
-        if i < nlev-len(center):
-            u_r[0,i] = 0.        
-        else:
+        if i >= nlev-len(center):
             # Transform lon-lat coordinates to polar
             ci = i -(nlev-len(center))
             x = ds.clon.values
@@ -138,12 +138,13 @@ def get_uv_from_polar(ds, center):
             # Calculate unit vectors e_r and e_phi
             e_r = np.array([np.cos(phi), np.sin(phi)])
             e_phi= np.array([-np.sin(phi), np.cos(phi)])
- 
-            u_r[0,i]   = e_r[0]*ds.u[0,i] + e_r[1]*ds.v[0,i]
-            u_phi[0,i] = e_phi[0]*ds.u[0,i] + e_phi[1]*ds.v[0,i]
+            
+            # Calculate u and v 
+            u[0,i] = ds.u_r[0,i] * e_r[0] + r * ds.u_phi[0,i] * e_phi[0]
+            v[0,i] = ds.u_r[0,i] * e_r[1] + r * ds.u_phi[0,i] * e_phi[1]
 
     # Add u_r and u_phi to dataset
-    ds = ds.assign(u_r = u_r)
-    ds = ds.assign(u_phi = u_phi)
-    
+    ds.u = u
+    ds.v = v
+
     return ds

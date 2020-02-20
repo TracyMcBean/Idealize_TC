@@ -5,7 +5,7 @@ sys.path.append('../../AsymptoticSolver/')
 
 import xarray as xr
 import numpy as np
-from numba import jit
+#from numba import jit
 from scipy.interpolate import griddata
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
@@ -15,7 +15,7 @@ from Utilities.coord_func import sel_blending_smooth as sel_blending
 from AsymptoticSolver import polar_dft, polar_idft, pick_fourier_comp
 
 
-@jit(parallel=True)
+#@jit   #(parallel=True)
 def ft_var(var_da, center, r_rad, nlev, lev_start, var_name, var_nshort, height, verbose = True, create_plot = False, r_earth=6371):
     '''
     Convert a given variable from lon-lat into polar coordinates.
@@ -40,8 +40,32 @@ def ft_var(var_da, center, r_rad, nlev, lev_start, var_name, var_nshort, height,
     # This has to be done for every level seperately as it depends on the position of the center.
     nlev = int(nlev)
     lev_start = int(lev_start)
+  
+     
+    # Get background necessary for analysing perturbation
+    background = np.empty([nlev])
+    for i in range(0, nlev-lev_start+1, 1):
+        background[i] = var_da.values[i].mean()
+    
+    # limits of quadratic region to select
+    # include some buffer because center varies in each level
+    lonlat_box = {'lon_up':-0.57,'lon_down':-0.68, 'lat_up': 0.17, 'lat_down': 0.30}
 
+    # To conserve the indexing the cellID must be added as coordinate variable
+    var_da = var_da.assign_coords({'ncells': var_da.ncells.values}) 
+ 
+    #print('cell with cellid 0:', var_da.values[0,var_da.ncells.values[0]])
+    print('These are the ncells values before selecting a box:', var_da.ncells.values)    
+    # Select region of interest
+    var_da = var_da.where(var_da['clon'] < lonlat_box['lon_up'], drop=True)
+    var_da = var_da.where(var_da['clon'] > lonlat_box['lon_down'], drop=True)
+    var_da = var_da.where(var_da['clat'] < lonlat_box['lat_up'], drop=True)
+    var_da = var_da.where(var_da['clat'] < lonlat_box['lat_down'], drop=True)
+    print('These are the ncells values after selecting a box:', var_da.ncells.values)    
+    # This is necessary for the blending later
     cellID = var_da.ncells.values
+    
+    #print('cell with cellid 0:', var_da.values[0,var_da.ncells.values[0]])
     
     lon = var_da.clon.values
     lat = var_da.clat.values
@@ -59,12 +83,13 @@ def ft_var(var_da, center, r_rad, nlev, lev_start, var_name, var_nshort, height,
     phi_grid_da = xr.DataArray(phi_grid, coords=[('phi', phi_grid)])
 
     # Calculations for each selected level
-    for i in range(70-lev_start,nlev-lev_start+1):  
+    for i in range(70-lev_start,71-lev_start+1):  
     #for i in range(0, nlev-lev_start+1, 1):
         lev_index = i + lev_start-1
         lev_height = height[lev_index,0]
         print('FT for level: ', lev_index+1, lev_height)
  
+        
         # Calculate r and phi for single level
         r,phi = cart2pol(lon,lat,center[i,])
 
@@ -113,17 +138,23 @@ def ft_var(var_da, center, r_rad, nlev, lev_start, var_name, var_nshort, height,
         if verbose:
             print('Starting FT...')
         
-        background = var_da.values[lev_index].mean() 
 
         fvar = polar_dft(var_polar_da, polar_dim='phi')
         fvar_i = polar_idft(fvar, polar_dim='phi')
 
         # Select fourier mode 0 and 1
-        fvar01 = fvar
-        fvar01[2:]=0.
-        fvar01_i = xr.ufuncs.real(polar_idft(fvar01, polar_dim='phi')) # only real part      
+        if var_nshort == 'u_phi' or var_nshort == 'u_r': 
+            # For horizontal winds I have to use k=-1 as well as 0 and 1 mode
+            fvar01 = fvar
+            fvar[2:-1] = 0.
+            fvar01_i = xr.ufuncs.real(polar_idft(fvar01, polar_dim='phi'))
+        else:
+            # For all other variables select only Fourier mode 0 and 1
+            fvar01 = fvar
+            fvar01[2:]=0.
+            fvar01_i = xr.ufuncs.real(polar_idft(fvar01, polar_dim='phi')) # only real part      
         # Sanity check for fourier modes
-        if False:
+        if True:
             fig = plt.figure(figsize=(9,3))
             ax = fig.add_subplot(121)
             cs = ax.pcolor(fvar01_i.x, fvar01_i.y, fvar01_i)
@@ -142,7 +173,7 @@ def ft_var(var_da, center, r_rad, nlev, lev_start, var_name, var_nshort, height,
             fvar0[1:] = 0.  
             fvar0_i = polar_idft(fvar0)   
             # Reduce 0 mode to p_4
-            fvar_p4_i = fvar0_i - background
+            fvar_p4_i = fvar0_i - background[lev_index]
     
 # 4. Transform idealized data back to lon lat grid.
         if verbose:
@@ -164,10 +195,11 @@ def ft_var(var_da, center, r_rad, nlev, lev_start, var_name, var_nshort, height,
                           dims={'ncells': var_da.ncells })
       
         # Still sanity check for fourier modes remapping
-        if False:
+        if True:
+            print('Plotting idealized data that should be remapped')
             plot_region_da = var_ideal_da.where(var_ideal_da.r < (r_rad-0.001) , drop = True) 
             ax = fig.add_subplot(122)
-            cs = ax.tripcolor(plot_region_da.clon, plot_region_da.clat, plot_region_da)
+            cs = ax.tripcolor(plot_region_da.clon, plot_region_da.clat, plot_region_da.values)
             ax.title.set_text('%s (%s m)' % (var_name, np.int(lev_height)))
             cb = plt.colorbar(cs, ax=ax)
             plt.show()
@@ -221,7 +253,7 @@ def ft_var(var_da, center, r_rad, nlev, lev_start, var_name, var_nshort, height,
             cb = plt.colorbar(cs, ax=ax)
         
             # Save image for each level
-            plt.savefig('/home/bekthkis/Fiona2016/Plots/%s/%s_ft_lev_%s.png' % (var_name, var_nshort, np.int(lev_height) ))
+            plt.savefig('/home/bekthkis/Plots/Fiona/%s/%s_ft_lev_%s.png' % (var_name, var_nshort, np.int(lev_height) ))
     
             plt.close()
     print('Finished ft_var()')
