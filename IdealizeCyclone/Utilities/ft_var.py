@@ -82,8 +82,8 @@ def ft_var(var_da, center, r_rad, nlev, lev_start, var_name, var_nshort, height,
     phi_grid_da = xr.DataArray(phi_grid, coords=[('phi', phi_grid)])
 
     # Calculations for each selected level
-    #for i in range(70-lev_start,71-lev_start+1):  
-    for i in range(lev_start, nlev+1, 1):
+    for i in range(66,66+1):  
+    #for i in range(lev_start, nlev+1, 1):
         center_index = i- (nlev - len(center))-1
         lev_index = i-1
         lev_height = height[lev_index,0]
@@ -211,7 +211,8 @@ def ft_var(var_da, center, r_rad, nlev, lev_start, var_name, var_nshort, height,
  
         # Calculate limits where logistic function should start and end.       
         km50_rad = 50/r_earth
-        blend_lim = [(r_rad - km50_rad), r_rad] 
+        # The limit is set a bit shorter than r_rad to avoid including nan data
+        blend_lim = [(r_rad - km50_rad), r_rad-1e-07] 
         
         # Extract blending zone (ring from r_rad-50km to r_rad)
         blend_zone = var_ideal_da.where(var_ideal_da.r > blend_lim[0], drop=True)  
@@ -223,6 +224,11 @@ def ft_var(var_da, center, r_rad, nlev, lev_start, var_name, var_nshort, height,
         val_orig  = orig_da.values[lev_index, blend_zone.cellID[blend_zone.ncells.values]]
         
         val_cell = sel_blending(cell_r, r_rad, val_ideal, val_orig)
+        if np.any(np.isnan(val_cell)):
+            print('These are the nan val_ideal, val_orig, cell_r:')
+            nan_ids = np.where(np.isnan(val_cell)==True)
+            print(val_ideal[nan_ids], val_orig[nan_ids], cell_r[nan_ids])
+
         orig_da.values[lev_index, blend_zone.cellID] = val_cell
 
         # Replace all values in cells with radius distance less than blending start

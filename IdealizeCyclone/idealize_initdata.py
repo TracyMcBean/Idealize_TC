@@ -21,16 +21,16 @@ save_ds           = False         # Save data set containing idealized data
 lev_start         = 45            # Level from where the calculations should start
 km = 250                           # radius around cyclone
 r_earth = 6371                     # earths radius
-ft_variables = {'density': True, 'virt pot temp': False, 'pressure':True, \
+ft_variables = {'density': False, 'virt pot temp': False, 'pressure':True, \
                 'horizontal wind':False, 'w':False, 'spec humidity':False, \
-                'temperature':False, 'turbulent kinetic energy': True, \
+                'temperature':False, 'turbulent kinetic energy': False, \
                 'spec cloud water': False, 'spec cloud ice': False, \
                 'rain mixing ratio': False, 'snow mixing ratio': False }
 #------------------------------------------------------------------------------
 
 # Set radius in radian using km
 r_rad = km / r_earth
-
+print('r_rad', r_rad)
 # initial data
 ds = xr.open_dataset(data_file)
 
@@ -145,15 +145,15 @@ if ft_variables['snow mixing ratio']:
 print(ds)
 
 # Save idealized data set
-save_ds=True
+save_ds=False
 if save_ds:
     ds.to_netcdf(data_out_file, mode = 'w', format='NETCDF4')
 
-
-plt.figure()
-plt.tripcolor(ds.clon, ds.clat, ds.u.isel(time = 0, height=69))
-plt.colorbar()
-plt.show()
+if False:
+    plt.figure()
+    plt.tripcolor(ds.clon, ds.clat, ds.u.isel(time = 0, height=69))
+    plt.colorbar()
+    plt.show()
 '''
 plt.figure()
 plt.tripcolor(ds.clon, ds.clat, ds.theta_v.isel(time = 0, height=70))
