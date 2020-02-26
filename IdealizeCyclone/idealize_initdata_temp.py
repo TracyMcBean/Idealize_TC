@@ -16,14 +16,14 @@ center_from_file  = True           # If center location should be read from
                                    # array, set to true
 center_file       = "./Data/center_fiona.npy"      # Name of file containing center
 data_file         = "../../../init_data/dei4_NARVALII_2016081700_fg_DOM01_ML_0012.nc"
-data_out_file     = "../../../init_data/pres_dens_tke_idealized.nc"
+data_out_file     = "../../../init_data/temp_thetav_idealized.nc"
 save_ds           = False         # Save data set containing idealized data
 lev_start         = 45            # Level from where the calculations should start
 km = 250                           # radius around cyclone
 r_earth = 6371                     # earths radius
-ft_variables = {'density': True, 'virt pot temp': False, 'pressure':True, \
+ft_variables = {'density': False, 'virt pot temp': True, 'pressure':False, \
                 'horizontal wind':False, 'w':False, 'spec humidity':False, \
-                'temperature':False, 'turbulent kinetic energy': True, \
+                'temperature':True, 'turbulent kinetic energy': False, \
                 'spec cloud water': False, 'spec cloud ice': False, \
                 'rain mixing ratio': False, 'snow mixing ratio': False }
 #------------------------------------------------------------------------------
@@ -66,20 +66,20 @@ ds = add_u_polar(ds, center)
 if ft_variables['density']:
     print('----------------------------------------------------------')
     print('Density')
-    ideal_rho_da = ft_var(ds.rho[0], center, r_rad, nlev, lev_start, 'Density', 'rho', height, create_plot=True)
+    ideal_rho_da = ft_var(ds.rho[0], center, r_rad, nlev, lev_start, 'Density', 'rho', height, create_plot=False)
     ds.rho[0] = ideal_rho_da
 
 if ft_variables['virt pot temp']:
     print('----------------------------------------------------------')
     print('Virtual potential temperature')
-    ideal_data_da = ft_var(ds.theta_v[0], center, r_rad, nlev, lev_start, 'virt_pot_temp', 'theta_v', height, create_plot=False)
+    ideal_data_da = ft_var(ds.theta_v[0], center, r_rad, nlev, lev_start, 'virt_pot_temp', 'theta_v', height, create_plot=True)
     ds.theta_v[0] = ideal_data_da
 
 
 if ft_variables['pressure']:
     print('----------------------------------------------------------')
     print('Pressure')
-    ideal_data_da = ft_var(ds.pres[0], center, r_rad, nlev, lev_start, 'Pressure', 'pres', height, create_plot=False)
+    ideal_data_da = ft_var(ds.pres[0], center, r_rad, nlev, lev_start, 'Pressure', 'pres', height, create_plot=True)
     ds.pres[0] = ideal_data_da
 
 
@@ -101,13 +101,13 @@ if ft_variables['w']:
 if ft_variables['temperature']:
     print('----------------------------------------------------------')
     print('Temperature')
-    ideal_data_da = ft_var(ds.temp[0], center, r_rad, nlev, lev_start, 'Temperature', 'w', height, create_plot=False)
+    ideal_data_da = ft_var(ds.temp[0], center, r_rad, nlev, lev_start, 'Temperature', 'w', height, create_plot=True)
     ds.temp[0] = ideal_data_da
 
 if ft_variables['turbulent kinetic energy']:
     print('----------------------------------------------------------')
     print('Turbulent kinetic energy')
-    ideal_data_da = ft_var(ds.tke[0], center, r_rad, nlev, lev_start, 'Turb_kin_energy', 'tke', height, create_plot=True)
+    ideal_data_da = ft_var(ds.tke[0], center, r_rad, nlev, lev_start, 'Turb_kin_energy', 'tke', height, create_plot=False)
     ds.tke[0] = ideal_data_da
 
 if ft_variables['spec humidity']:
@@ -145,7 +145,7 @@ if ft_variables['snow mixing ratio']:
 print(ds)
 
 # Save idealized data set
-save_ds=True
+save_ds = True
 if save_ds:
     ds.to_netcdf(data_out_file, mode = 'w', format='NETCDF4')
 

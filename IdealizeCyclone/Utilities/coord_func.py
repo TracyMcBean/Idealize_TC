@@ -34,7 +34,7 @@ def blend_func(x, x_0, k=1, L=1):
     Returns probability between 0 and 1
     """
     
-    p = L / (1 + math.exp(k * ( x - x_0) ))
+    p = L / (1 + np.exp(k * ( x - x_0) ))
 
     return p
 
@@ -51,9 +51,9 @@ def sel_blending_dis(r, r_rad, val_ideal, val_orig, r_earth=6371):
     
     # Set midpoint for the logistic function
     km25_rad = 25/r_earth    
-    x0 = r_rad - km25_rad
+    x_0 = r_rad - km25_rad
     # Get probability of acceptance
-    p = blend_func(r, x0, k=1100)
+    p = blend_func(r, x_0, k=1100)
 
     p_rand = random.uniform(0,1)
     
@@ -75,17 +75,18 @@ def sel_blending_smooth(r, r_rad, val_ideal, val_orig, r_earth=6371):
     idealized data, based on their weights.
     
     Keyword arguments:
-    float -- radius of cell
-    float -- idealized value of cell
-    float -- original value of cell
+    array -- radius of cell
+    float -- radius of cyclone
+    array -- idealized value of cell
+    array -- original value of cell
     """
     
     # Set midpoint for the logistic function
     # Total border region is 50 km therefore the middle is by 25 km
     km25_rad = 25/r_earth    
-    x0 = r_rad - km25_rad
+    x_0 = r_rad - km25_rad
     # Get probability of acceptance
-    p = blend_func(r, x0, k=1100)
+    p = blend_func(r, x_0, k=1100)
 
     value = p * val_ideal + (1-p) * val_orig 
 

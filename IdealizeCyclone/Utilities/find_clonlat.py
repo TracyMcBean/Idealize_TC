@@ -44,8 +44,8 @@ def get_clonlat(fg, single_lev, p_env, r):
    # Calculate average over all cells in circle region
    #p_env = np.mean(circle_sel.pres.values)
    # I am using p_max because otherwise I end up with lots of negative values and therefore get wrong values
-   #p_max = circle_sel.pres.values.max()
-   p_prime = p_env - circle_sel.pres.values
+   p_max = circle_sel.pres.values.max()
+   p_prime = p_max - circle_sel.pres.values
 
    clon_new = np.sum(circle_sel.clon.values * p_prime)/np.sum(p_prime)
    clat_new = np.sum(circle_sel.clat.values * p_prime)/np.sum(p_prime)

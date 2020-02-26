@@ -143,8 +143,8 @@ def get_uv_from_polar(ds, center):
             u[0,i] = ds.u_r[0,i] * e_r[0] + r * ds.u_phi[0,i] * e_phi[0]
             v[0,i] = ds.u_r[0,i] * e_r[1] + r * ds.u_phi[0,i] * e_phi[1]
 
-    # Add u_r and u_phi to dataset
-    ds.u = u
-    ds.v = v
+    # Exchange values of u and v
+    ds = ds.assign(u = u)
+    ds = ds.assign(v = v)
 
     return ds
