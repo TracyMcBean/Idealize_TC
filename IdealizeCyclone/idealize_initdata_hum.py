@@ -17,7 +17,7 @@ center_from_file  = True           # If center location should be read from
 center_file       = "./Data/center_fiona.npy"      # Name of file containing center
 data_file         = "../../../init_data/dei4_NARVALII_2016081700_fg_DOM01_ML_0012.nc"
 data_out_file     = "../../../init_data/hum_idealized.nc"
-isplotted         = True          # True if plots of dft should be created
+isplotted         = False         # True if plots of dft should be created
 save_ds           = False         # Save data set containing idealized data
 lev_start         = 45            # Level from where the calculations should start
 km = 250                           # radius around cyclone
@@ -146,7 +146,7 @@ if ft_variables['snow mixing ratio']:
 print(ds)
 
 # Save idealized data set
-save_da = True
+save_ds = True
 if save_ds:
     ds.to_netcdf(data_out_file, mode = 'w', format='NETCDF4')
 

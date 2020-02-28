@@ -1,3 +1,4 @@
+import sys
 import xarray as xr
 import numpy as np
 from Utilities.add_var import add_theta, add_u_polar, get_uv_from_polar
@@ -21,9 +22,9 @@ save_ds           = False         # Save data set containing idealized data
 lev_start         = 45            # Level from where the calculations should start
 km = 250                           # radius around cyclone
 r_earth = 6371                     # earths radius
-ft_variables = {'density': False, 'virt pot temp': False, 'pressure':True, \
+ft_variables = {'density': True, 'virt pot temp': False, 'pressure':True, \
                 'horizontal wind':False, 'w':False, 'spec humidity':False, \
-                'temperature':False, 'turbulent kinetic energy': False, \
+                'temperature':False, 'turbulent kinetic energy': True, \
                 'spec cloud water': False, 'spec cloud ice': False, \
                 'rain mixing ratio': False, 'snow mixing ratio': False }
 #------------------------------------------------------------------------------
@@ -66,8 +67,11 @@ ds = add_u_polar(ds, center)
 if ft_variables['density']:
     print('----------------------------------------------------------')
     print('Density')
-    ideal_rho_da = ft_var(ds.rho[0], center, r_rad, nlev, lev_start, 'Density', 'rho', height, create_plot=True)
+    ideal_rho_da = ft_var(ds.rho[0], center, r_rad, nlev, lev_start, 'Density', 'rho', height, create_plot=False)
     ds.rho[0] = ideal_rho_da
+    if np.any(np.isnan(ds.rho[0])):
+        print('values are nan')
+        sys.exit() 
 
 if ft_variables['virt pot temp']:
     print('----------------------------------------------------------')
@@ -145,7 +149,7 @@ if ft_variables['snow mixing ratio']:
 print(ds)
 
 # Save idealized data set
-save_ds=False
+save_ds=True
 if save_ds:
     ds.to_netcdf(data_out_file, mode = 'w', format='NETCDF4')
 

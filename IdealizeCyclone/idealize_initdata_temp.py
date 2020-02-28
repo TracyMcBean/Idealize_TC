@@ -72,7 +72,7 @@ if ft_variables['density']:
 if ft_variables['virt pot temp']:
     print('----------------------------------------------------------')
     print('Virtual potential temperature')
-    ideal_data_da = ft_var(ds.theta_v[0], center, r_rad, nlev, lev_start, 'virt_pot_temp', 'theta_v', height, create_plot=True)
+    ideal_data_da = ft_var(ds.theta_v[0], center, r_rad, nlev, lev_start, 'virt_pot_temp', 'theta_v', height, create_plot=False)
     ds.theta_v[0] = ideal_data_da
 
 
@@ -101,7 +101,7 @@ if ft_variables['w']:
 if ft_variables['temperature']:
     print('----------------------------------------------------------')
     print('Temperature')
-    ideal_data_da = ft_var(ds.temp[0], center, r_rad, nlev, lev_start, 'Temperature', 'w', height, create_plot=True)
+    ideal_data_da = ft_var(ds.temp[0], center, r_rad, nlev, lev_start, 'Temperature', 'w', height, create_plot=False)
     ds.temp[0] = ideal_data_da
 
 if ft_variables['turbulent kinetic energy']:

@@ -66,11 +66,11 @@ def add_u_polar(ds, center):
     nlev = len(ds.height)
     
     # create data array where values shall be replaced
-    u_r = ds.u
+    u_r = ds.u.copy()
     u_r.name = 'u_r'
     u_r.attrs['standard_name'] = 'radial_wind'
 
-    u_phi = ds.u
+    u_phi = ds.u.copy()
     u_phi.name = 'u_phi'
     u_phi.attrs['standard_name'] = 'tangentiali_wind'
     
