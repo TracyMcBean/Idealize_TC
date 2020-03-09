@@ -72,7 +72,7 @@ def add_u_polar(ds, center):
 
     u_phi = ds.u.copy()
     u_phi.name = 'u_phi'
-    u_phi.attrs['standard_name'] = 'tangentiali_wind'
+    u_phi.attrs['standard_name'] = 'tangential_wind'
     
     # Use center for possible levels. All other levels will simply be set to zero because they are not necessary.
     for i in range (0,nlev):

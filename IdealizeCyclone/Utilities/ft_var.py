@@ -141,18 +141,15 @@ def ft_var(var_da, center, r_rad, nlev, lev_start, var_name, var_nshort, height,
         fvar = polar_dft(var_polar_da, polar_dim='phi')
         fvar_i = polar_idft(fvar, polar_dim='phi')
 
-        # Select fourier mode 0 and 1
-        if var_nshort == 'u_phi' or var_nshort == 'u_r': 
-            # For horizontal winds I have to use k=-1 as well as 0 and 1 mode
-            print('detected horizontal wind therefore using k=-1,0,1')
-            fvar01 = fvar
-            fvar[2:-1] = 0.
-            fvar01_i = xr.ufuncs.real(polar_idft(fvar01, polar_dim='phi'))
-        else:
-            # For all other variables select only Fourier mode 0 and 1
-            fvar01 = fvar
-            fvar01[2:]=0.
-            fvar01_i = xr.ufuncs.real(polar_idft(fvar01, polar_dim='phi')) # only real part      
+        # Select fourier mode -1, 0 and 1
+        fvar_sub = fvar
+        fvar[2:-1] = 0.
+        fvar_sub_i = xr.ufuncs.real(polar_idft(fvar_sub, polar_dim='phi'))
+        #else:
+        #    # For all other variables select only Fourier mode 0 and 1
+        #    fvar01 = fvar
+        #    fvar01[2:]=0.
+        #    fvar01_i = xr.ufuncs.real(polar_idft(fvar01, polar_dim='phi')) # only real part      
         
         if create_plot:
             # Select 1st mode
@@ -173,11 +170,11 @@ def ft_var(var_da, center, r_rad, nlev, lev_start, var_name, var_nshort, height,
         if verbose:
            print('Mapping idealized data to lonlat...')
         
-        values = np.asarray(fvar01_i).reshape(len(polar_points[:,0]))
+        values = np.asarray(fvar_sub_i).reshape(len(polar_points[:,0]))
         
         # Create correct mapping points for each cell
-        new_x_points= np.asarray(fvar01_i.x.values).reshape(1,len(fvar01_i.x.values[0])*len(fvar01_i.x.values[0]))
-        new_y_points= np.asarray(fvar01_i.y.values).reshape(1,len(fvar01_i.y.values[0])*len(fvar01_i.y.values[0]))
+        new_x_points= np.asarray(fvar_sub_i.x.values).reshape(1,len(fvar_sub_i.x.values[0])*len(fvar_sub_i.x.values[0]))
+        new_y_points= np.asarray(fvar_sub_i.y.values).reshape(1,len(fvar_sub_i.y.values[0])*len(fvar_sub_i.y.values[0]))
         polar_points = np.asarray([new_x_points, new_y_points]).reshape((2,len(new_x_points[0]))).transpose() 
         
         # Remap data
@@ -194,7 +191,7 @@ def ft_var(var_da, center, r_rad, nlev, lev_start, var_name, var_nshort, height,
                 print('Plotting idealized data that should be remapped')
             fig = plt.figure(figsize=(9,3))
             ax = fig.add_subplot(121)
-            cs = ax.pcolor(fvar01_i.x, fvar01_i.y, fvar01_i)
+            cs = ax.pcolor(fvar_sub_i.x, fvar_sub_i.y, fvar_sub_i)
             ax.title.set_text('%s (%s m)' % (var_name, np.int(lev_height)))
             cb = plt.colorbar(cs, ax=ax)
             plot_region_da = var_ideal_da.where(var_ideal_da.r < (r_rad-0.001) , drop = True)
