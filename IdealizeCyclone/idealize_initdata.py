@@ -62,7 +62,7 @@ else:
 
 # Add variables that shall be used in fourier transform
 #ds = add_theta(ds)
-ds = add_u_polar(ds, center)
+#ds = add_u_polar(ds, center)
 
 if ft_variables['density']:
     print('----------------------------------------------------------')
@@ -89,7 +89,8 @@ if ft_variables['pressure']:
 
 if ft_variables['horizontal wind']:
     print('----------------------------------------------------------')
-    print('Horizontal wind')
+    print('Horizontal wind')   
+    
     ideal_u_phi = ft_var(ds.u_phi[0], center, r_rad, nlev, lev_start, 'Wind/u_phi', 'u_phi', height, create_plot=False) 
     ideal_u_r = ft_var(ds.u_r[0], center, r_rad, nlev, lev_start, 'Wind/u_r', 'u_r', height, create_plot=False)
     # Calculate u and v based on u_phi and u_r

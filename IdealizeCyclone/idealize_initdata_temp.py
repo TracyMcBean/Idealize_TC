@@ -60,8 +60,6 @@ else:
 # 2. Preprocess data -----------------------------------------------------------
 
 # Add variables that shall be used in fourier transform
-#ds = add_theta(ds)
-ds = add_u_polar(ds, center)
 
 if ft_variables['density']:
     print('----------------------------------------------------------')
@@ -150,10 +148,10 @@ if save_ds:
     ds.to_netcdf(data_out_file, mode = 'w', format='NETCDF4')
 
 
-plt.figure()
-plt.tripcolor(ds.clon, ds.clat, ds.u.isel(time = 0, height=69))
-plt.colorbar()
-plt.show()
+#plt.figure()
+#plt.tripcolor(ds.clon, ds.clat, ds.u.isel(time = 0, height=69))
+#plt.colorbar()
+#plt.show()
 '''
 plt.figure()
 plt.tripcolor(ds.clon, ds.clat, ds.theta_v.isel(time = 0, height=70))

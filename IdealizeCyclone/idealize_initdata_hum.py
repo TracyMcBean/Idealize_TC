@@ -62,7 +62,7 @@ else:
 
 # Add variables that shall be used in fourier transform
 #ds = add_theta(ds)
-ds = add_u_polar(ds, center)
+#ds = add_u_polar(ds, center)
 
 if ft_variables['density']:
     print('----------------------------------------------------------')
