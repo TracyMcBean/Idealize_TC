@@ -9,11 +9,11 @@ def get_lonlat(fg, single_lev, p_env, r):
     Get the location of the center point on a single level, given a first guess and a data set.
     r is radius of circle that should be selected.
     '''
-   
     # Extract first guess lon and lat
     lon_fg = fg[0]
     lat_fg = fg[1]
-   
+    
+    r = r 
     # Cut out quadratic box containing all cells in possible circle region
     lon_lim_east = lon_fg + r
     lon_lim_west = lon_fg - r
@@ -42,7 +42,7 @@ def get_lonlat(fg, single_lev, p_env, r):
             lon_array[c] = single_lev.lon.values[lon_i]
             lat_array[c] = single_lev.lat.values[lat_i]
             pres_array[c] = single_lev.pres.values[lat_i, lon_i]
-            c =+ 1
+            c += 1
 
 
    
@@ -50,7 +50,9 @@ def get_lonlat(fg, single_lev, p_env, r):
     circle_sel = xr.Dataset({'pres': pres_array, 'dist': dist_array, 'lon': lon_array, 'lat': lat_array})
     # Extract region in circle
     circle_sel = circle_sel.where(circle_sel['dist'] <= r, drop=True)
+ 
 
+    print(circle_sel.pres.values)
     # Calculate average over all cells in circle region
     #p_env = np.mean(circle_sel.pres.values)
     # I am using p_max because otherwise I end up with lots of negative values and therefore get wrong values

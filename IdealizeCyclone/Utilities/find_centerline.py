@@ -33,19 +33,19 @@ lev_start = 43
 #lonlat_box = {'lon_up':-0.57,'lon_down':-0.68, 'lat_up': 0.17, 'lat_down': 0.30}
                           # limits of quadratic region to select
                           #  include some buffer because center varies in each level
-filename = "../../Data/center_fiona_reference" # Name of file where center array should be saved
+filename = "../Data/center_fiona_reference" # Name of file where center array should be saved
 save = True               # Should center array be saved in to "filename"
 #==============================================================================
 
 # Read in data
 print('Reading data...')
 #pres_ds = xr.open_dataset('../../../Data/pres_data.nc')
-pres_ds = xr.open_dataset('../../../Data/pres_data_ref_1.nc')
+pres_ds = xr.open_dataset('../../../Data/pres_data_ref.nc')
 
 print('Calculate environment and extract region')
 p_env = [np.mean(pres_ds.pres[0,i].values) for i in range(lev_start-1, lev)]
 
-center = np.empty([len(pres_ds.height),2])
+center = np.empty([len(pres_ds.time),len(pres_ds.height),2])
 # extract region of fiona 
 coord_unit='deg'
 if coord_unit == 'rad':
@@ -81,31 +81,32 @@ if show_region:
 else:
     print("Not creating plot of region.")
 
-# The center must be found on each level
-while lev >= lev_start :
-    print( 'Finding center on lev:', lev)
-
-    # 1. First guess:
-    if coord_unit=='rad':
-        single_lev = pres_ds.pres.isel(time = 0, height=lev-1)
-        clon_fg = single_lev.where(single_lev == single_lev.min(), \
-              drop=True).clon.values[0]
-        clat_fg = single_lev.where(single_lev == single_lev.min(), \
-              drop=True).clat.values[0]
-
-        center[lev-lev_start,] = get_clonlat([clon_fg, clat_fg], single_lev, p_env[lev-lev_start], r_rad)
+for t in range(0,len(pres_ds.time)):
+    # The center must be found on each level
+    while lev >= lev_start :
+        print( 'Finding center on lev:', lev)
     
-    if coord_unit=='deg':
-        single_lev = pres_ds.isel(time = 0, height=lev-1)
-        lon_fg = single_lev.where(single_lev == single_lev.min(), \
-              drop=True).lon.values[0]
-        lat_fg = single_lev.where(single_lev == single_lev.min(), \
-              drop=True).lat.values[0]
- 
-        center[lev-lev_start,] = get_lonlat([lon_fg, lat_fg], single_lev, p_env[lev-lev_start], r_deg)
-
-    lev -= 1
-    print(center)
+        # 1. First guess:
+        if coord_unit=='rad':
+            single_lev = pres_ds.pres.isel(time = t, height=lev-1)
+            clon_fg = single_lev.where(single_lev == single_lev.min(), \
+                  drop=True).clon.values[0]
+            clat_fg = single_lev.where(single_lev == single_lev.min(), \
+                  drop=True).clat.values[0]
+    
+            center[lev-lev_start,] = get_clonlat([clon_fg, clat_fg], single_lev, p_env[lev-lev_start], r_rad)
+        
+        if coord_unit=='deg':
+            single_lev = pres_ds.isel(time = 0, height=lev-1)
+            lon_fg = single_lev.where(single_lev == single_lev.min(), \
+                  drop=True).lon.values[0]
+            lat_fg = single_lev.where(single_lev == single_lev.min(), \
+                  drop=True).lat.values[0]
+     
+            center[t,lev-lev_start,] = get_lonlat([lon_fg, lat_fg], single_lev, p_env[lev-lev_start], r_deg)
+    
+        lev -= 1
+        print(center[t])
 
 if save:
     print(" Writing center array into: ", filename)
