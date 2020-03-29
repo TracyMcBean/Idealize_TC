@@ -27,14 +27,14 @@ def get_clonlat(fg, single_lev, p_env, r):
    single_lev = single_lev.where(single_lev['clat'] > clat_lim_south, drop=True)
    
    # Get radial distance of each cell to first guess.
-   # Following version of distance calculation gave wrong values:
-   #dist_test = scipy.spatial.distance.cdist(np.asarray([single_lev.clon.values, single_lev.clat.values]).reshape((len(lon_dist),2)), np.asarray([clon_fg, clat_fg]).reshape((1,2))) 
 
    dist_array = np.empty([len(single_lev.ncells)])
-
-   for i in range(len(single_lev.ncells)):
-      dist_array[i]= math.sqrt((single_lev.clon.values[i] -clon_fg)**2 \
-                  + (single_lev.clat.values[i] - clat_fg)**2)
+   dist_array = np.sqrt((single_lev_u.clon.values - center_loc[0])**2 \
+                 + (single_lev_u.clat.values - center_loc[1])**2)
+    
+   #for i in range(len(single_lev.ncells)):
+   #   dist_array[i]= math.sqrt((single_lev.clon.values[i] -clon_fg)**2 \
+   #               + (single_lev.clat.values[i] - clat_fg)**2)
 
    # Create new dataset combining pres and dist data.
    circle_sel = xr.Dataset({'pres': single_lev, 'dist': (('ncells'), dist_array)})
