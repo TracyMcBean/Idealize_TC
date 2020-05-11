@@ -1,4 +1,5 @@
-''' Create plots of whatever you want to see Yippieeyay :D
+''' Create plots for the centerline of the initial data of Fiona simulation (17.08.2016 0012 UTC).
+    Necessary available data: Input data and calculated centerline location.
 '''
 import xarray as xr
 import numpy as np
@@ -31,6 +32,7 @@ if plot_centerline:
      ax.set_zlabel('Height at half level [m]')
      #plt.show()
 
+     # Different configuration for comparison
      fig = plt.figure()
      ax = fig.add_subplot(111, projection='3d')
      ax.plot(np.flipud(center[9:41,0]), np.flipud(center[9:41,1]), np.flipud(ds.z_ifc.values[(34+9):75,0]))
@@ -43,7 +45,7 @@ if plot_centerline:
      ax.set_zlabel('Height at half level [m]')
      #plt.show()
 
-
+     # Plot that seperates the longitude and latitude values
      fig = plt.figure()
      ax = fig.add_subplot(121)
      ax.plot(np.flipud(center[9:41,0]), np.flipud(ds.z_ifc.values[(34+9):75,0]))
