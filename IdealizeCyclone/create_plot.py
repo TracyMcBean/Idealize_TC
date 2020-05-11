@@ -1,5 +1,5 @@
 ''' Create plots for the centerline of the initial data of Fiona simulation (17.08.2016 0012 UTC).
-    Necessary available data: Input data and calculated centerline location.
+    Necessary available data: Initial data and calculated centerline location.
 '''
 import xarray as xr
 import numpy as np
